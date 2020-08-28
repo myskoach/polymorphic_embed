@@ -6,6 +6,7 @@ defmodule PolymorphicEmbed.CreateTables do
       add(:date, :utc_datetime, null: false)
       add(:text, :text, null: false)
       add(:channel, :map, null: false)
+      add(:contexts, :map, null: false)
 
       timestamps()
     end

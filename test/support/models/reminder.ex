@@ -7,13 +7,14 @@ defmodule PolymorphicEmbed.Reminder do
     field(:date, :utc_datetime)
     field(:text, :string)
     field(:channel, PolymorphicEmbed.ChannelData)
+    field(:contexts, {:array, PolymorphicEmbed.Reminder.Context}, default: [])
 
     timestamps()
   end
 
   def changeset(struct, values) do
     struct
-    |> cast(values, [:date, :text, :channel])
+    |> cast(values, [:date, :text, :channel, :contexts])
     |> validate_required(:date)
   end
 end

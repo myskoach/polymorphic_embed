@@ -87,7 +87,8 @@ defmodule PolymorphicEmbed do
       defp map_from_struct(%module{} = struct, struct_type) do
         Map.from_struct(struct)
         |> maybe_put_type(module, struct_type)
-        |> Enum.map(fn {field, value} -> {field, dump_value(field, module, value)} end)
+        |> Stream.reject(fn {field, value} -> is_ecto_assoc?(module, field, value) end)
+        |> Stream.map(fn {field, value} -> {field, dump_value(field, module, value)} end)
         |> Enum.into(%{})
       end
 
@@ -130,6 +131,7 @@ defmodule PolymorphicEmbed do
           case value do
             %Ecto.Changeset{} = changeset ->
               Keyword.merge([{field, {"is invalid", changeset.errors}}], all_errors)
+
             _ ->
               all_errors
           end
@@ -172,6 +174,13 @@ defmodule PolymorphicEmbed do
         |> Enum.find(&(module == &1.module))
         |> Map.fetch!(:type)
       end
+
+      defp is_ecto_assoc?(_module, _field, %Ecto.Association.NotLoaded{}), do: true
+
+      defp is_ecto_assoc?(module, field, %_struct{}),
+        do: match?({:assoc, _}, module.__schema__(:type, field))
+
+      defp is_ecto_assoc?(_module, _field, _value), do: false
     end
   end
 end
