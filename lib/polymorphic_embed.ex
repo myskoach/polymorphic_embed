@@ -22,6 +22,8 @@ defmodule PolymorphicEmbed do
       end)
 
     quote do
+      @behaviour PolymorphicEmbed.Polymorphic
+
       use Ecto.Type
 
       @__meta_data unquote(Macro.escape(meta_data))
@@ -84,6 +86,12 @@ defmodule PolymorphicEmbed do
         Ecto.Type.dump(:map, map_from_struct(struct, :polymorphic_embed))
       end
 
+      @doc "Returns the concrete type for a struct or module."
+      @impl PolymorphicEmbed.Polymorphic
+      @spec get_polymorphic_type(module() | struct()) :: atom()
+      def get_polymorphic_type(module_or_struct),
+        do: PolymorphicEmbed.Polymorphic.get_type(module_or_struct, @__meta_data)
+
       defp map_from_struct(%module{} = struct, struct_type) do
         Map.from_struct(struct)
         |> maybe_put_type(module, struct_type)
@@ -130,6 +138,7 @@ defmodule PolymorphicEmbed do
           case value do
             %Ecto.Changeset{} = changeset ->
               Keyword.merge([{field, {"is invalid", changeset.errors}}], all_errors)
+
             _ ->
               all_errors
           end
