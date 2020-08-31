@@ -101,7 +101,7 @@ defmodule PolymorphicEmbed do
       end
 
       defp maybe_put_type(%{} = map, module, :polymorphic_embed) do
-        Map.put(map, :__type__, get_type_from_module(module))
+        Map.put(map, :__type__, get_polymorphic_type(module))
       end
 
       defp maybe_put_type(%{} = map, _, _), do: map
@@ -175,12 +175,6 @@ defmodule PolymorphicEmbed do
           entry ->
             Map.fetch!(entry, :module)
         end
-      end
-
-      defp get_type_from_module(module) do
-        @__meta_data
-        |> Enum.find(&(module == &1.module))
-        |> Map.fetch!(:type)
       end
 
       defp is_ecto_assoc?(_module, _field, %Ecto.Association.NotLoaded{}), do: true
