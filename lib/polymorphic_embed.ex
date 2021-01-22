@@ -114,6 +114,10 @@ defmodule PolymorphicEmbed do
         type = parent_module.__schema__(:type, field)
 
         case type do
+          {:parameterized, _, _} ->
+            {:ok, term} = Ecto.Type.dump(:map, map_from_struct(struct, :embed))
+            term
+
           {:embed, _} ->
             {:ok, term} = Ecto.Type.dump(:map, map_from_struct(struct, :embed))
             term
